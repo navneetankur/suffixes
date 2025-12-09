@@ -33,7 +33,13 @@ macro_rules! cast_these {
         #[inline]
         fn $t(self) -> $t {
             #[cfg(debug_assertions)]
-            {$t::try_from(self).unwrap()}
+            {
+                #[allow(irrefutable_let_patterns)]
+                let Ok(rv) = $t::try_from(self) else {
+                    panic!("can't cast {self} to {}", stringify!($t));
+                };
+                return rv;
+            }
             #[cfg(not(debug_assertions))]
             {self as $t}
         }
