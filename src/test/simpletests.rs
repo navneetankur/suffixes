@@ -409,7 +409,13 @@ fn test_trun_f64() {
 
 #[test]
 #[should_panic]
-fn test_panic_32() {
+fn test_panic_i32() {
     let minus_three = -3_i32;
     minus_three.u32();
+}
+#[test]
+#[should_panic]
+fn test_panic_isize() {
+    let minus_three = -3_isize;
+    minus_three.u();
 }
