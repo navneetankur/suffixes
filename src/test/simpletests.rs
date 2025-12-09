@@ -406,3 +406,10 @@ fn test_trun_f64() {
     assert_eq!(three.ti64()   , three as i64);
     assert_eq!(three.tisize() , three as isize);
 }
+
+#[test]
+#[should_panic]
+fn test_panic_32() {
+    let minus_three = -3_i32;
+    minus_three.u32();
+}

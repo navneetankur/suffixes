@@ -13,7 +13,7 @@ pub trait CastIt: Sized {
     fn f32  (self) -> f32  ;
     fn f64  (self) -> f64  ;
 }
-macro_rules! cast_these {
+macro_rules! cast_these_float {
     ($($t: ident),*) => {
         $(
         #[inline]
@@ -21,6 +21,19 @@ macro_rules! cast_these {
             let after = self as $t;
             debug_assert_eq!(self, after as Self);
             return after;
+        }
+        )*
+    };
+}
+macro_rules! cast_these {
+    ($($t: ident),*) => {
+        $(
+        #[inline]
+        fn $t(self) -> $t {
+            #[cfg(debug_assertions)]
+            {$t::try_from(self).unwrap()}
+            #[cfg(not(debug_assertions))]
+            {self as $t}
         }
         )*
     };
@@ -37,11 +50,28 @@ macro_rules! impl_castit {
             }
             cast_these!(u8, u16, u32, u64, usize);
             cast_these!(i8, i16, i32, i64, isize);
-            cast_these!(f32, f64);
+            cast_these_float!(f32, f64);
+        }
+        )*
+    };
+}
+macro_rules! impl_castit_float {
+    ($($t: ty),*) => {
+        $(
+        impl CastIt for $t {
+            #[inline]
+            fn u(self) -> usize {
+                let after = self as usize;
+                debug_assert_eq!(self, after as Self);
+                return after;
+            }
+            cast_these_float!(u8, u16, u32, u64, usize);
+            cast_these_float!(i8, i16, i32, i64, isize);
+            cast_these_float!(f32, f64);
         }
         )*
     };
 }
 impl_castit!(u8, u16, u32, u64, usize);
 impl_castit!(i8, i16, i32, i64, isize);
-impl_castit!(f32, f64);
+impl_castit_float!(f32, f64);
