@@ -1,14 +1,14 @@
 pub trait WrappedOption {
     fn some(self) -> Option<Self> where Self: core::marker::Sized;
 }
-pub trait WrappedResult<E> {
-    fn ok(self) -> Result<Self, E> where Self: std::marker::Sized;
-}
 impl<T> WrappedOption for T {
     fn some(self) -> Option<Self> where Self: core::marker::Sized { Some(self) }
 }
-impl<T, E> WrappedResult<E> for T {
-    fn ok(self) -> Result<Self, E> where Self: std::marker::Sized {
+pub trait WrappedResult {
+    fn ok<E>(self) -> Result<Self, E> where Self: std::marker::Sized;
+}
+impl<T> WrappedResult for T {
+    fn ok<E>(self) -> Result<Self, E> where Self: std::marker::Sized {
         Ok(self)
     }
 }
@@ -25,5 +25,10 @@ mod tests {
     fn t_wrapped_result() {
         fn takes_result(_: Result<i32, ()>){}
         takes_result(4i32.ok())
+    }
+    #[test]
+    fn t_wrapped_result2() {
+        fn returns_result(i: i32) -> Result<i32, ()>{ i.ok() }
+        assert_eq!(Ok(4), returns_result(4))
     }
 }
