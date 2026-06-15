@@ -1,5 +1,4 @@
 #![allow(clippy::needless_return)]
-#![feature(step_trait)]
 pub mod wrap;
 pub mod castit;
 pub mod castfrom;
