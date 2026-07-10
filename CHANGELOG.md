@@ -1,42 +1,40 @@
 # Changelog
 
-## 0.5.3
+## 0.5.2
+
+All of the casting guards are `debug_assertions` only. In a release build a cast
+is a plain `as`, and always has been. Everything below describes debug builds,
+and none of it changes which values a cast accepts.
 
 ### Changed
 
-- `TrunIt` no longer calls `trunc` in its guards, which was the last libcall
-  left in them. The guard never needed the truncated value, only the question of
-  whether it lands in range, and that is answerable from the input: `trunc(x)`
-  is in `[lo, hi)` exactly when `x` is in `(lo - 1, hi)`. A truncating guard now
-  makes no call at all on the path where it passes.
+- No guard makes a call any more on the path where it passes. `TrunIt` derived
+  its bounds with `exp2`, twice per signed method, and tested integrality with
+  `trunc`; both traits called `is_finite`. Each of those is a call in an
+  unoptimized build, which is the only build the guards are compiled into, so
+  none of them ever folded away. 0.5.1 had removed `exp2` from `CastIt` alone,
+  because the two traits carried their own copies of the same bound logic; they
+  now share one.
 
-- The `is_finite` check went with it. NaN fails every comparison and the
-  infinities fail a bound, so the range check already rejected them. They now
-  panic with `is out of range for` rather than `can't truncate`.
+- The bounds are const evaluated rather than derived. `trunc` is gone because a
+  truncation lands in `[lo, hi)` exactly when its input lies in `(lo - 1, hi)`,
+  which needs no truncation to decide. `is_finite` is gone because the range
+  check already rejected the non-finite values: NaN fails every comparison and
+  the infinities fail a bound.
 
-- `CastIt` drops its `is_finite` checks for the same reason, so every guard in
-  the crate is now free of calls on the path where it passes. Casting a NaN or an
-  infinity to an integer panics with `is out of range for` rather than
-  `can't cast`. Float to float casts still test for NaN, which is not redundant
-  there: NaN converts exactly but never compares equal to itself.
+- Casting or truncating a NaN or an infinity to an integer now panics with
+  `is out of range for` rather than `can't cast` or `can't truncate`. Only the
+  wording changed; those values were already rejected. Float to float casts still
+  test for NaN, which is not redundant there: NaN converts exactly but never
+  compares equal to itself.
 
 - `CastIt::u`, `TrunIt::tu` and `CastFrom::cast_from` are `inline(always)`. They
   only forward, so collapsing them costs no code and saves a stack frame per call
-  in an unoptimized build. The guarded methods stay `inline` on purpose: always
-  inlining those would stamp their cold panic path into every call site of a
-  dependent crate's debug build, which measures at roughly 190 bytes of `.text`
-  per cast.
-
-## 0.5.2
-
-### Changed
-
-- `TrunIt` no longer derives its range bounds with `exp2`, which is a libcall in
-  an unoptimized build and so was recomputed on every truncation. The signed
-  methods paid it twice, once per bound. This is the same fix 0.5.1 made to
-  `CastIt`; the two traits had duplicated the bound logic. `TrunIt` still calls
-  `trunc`, because there the truncated value is what gets range checked rather
-  than being a test for integrality.
+  in an unoptimized build; `cast_from` was costing two before reaching the guard.
+  The guarded methods stay `inline` on purpose: always inlining those would stamp
+  their cold panic path into every call site of a dependent crate's debug build,
+  which measures at roughly 190 bytes of `.text` per cast, and leaves release
+  output byte identical.
 
 ## 0.5.1
 
