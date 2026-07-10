@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The debug build cast guards no longer call into libm. They derived their
+  power of two bounds with `exp2` and tested integrality with `trunc`, both of
+  which lower to a libcall in an unoptimized build, and an unoptimized build is
+  the only one the guards are compiled into, so the constants were recomputed on
+  every cast. The bounds are now const evaluated and integrality is a compare
+  against the mantissa threshold plus an `i64` round trip. A cast in a release
+  build is still a plain `as`, as it has always been.
+
 ## 0.5.0
 
 All of the casting guards are `debug_assertions` only. In a release build a cast
