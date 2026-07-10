@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.2
+
+### Changed
+
+- `TrunIt` no longer derives its range bounds with `exp2`, which is a libcall in
+  an unoptimized build and so was recomputed on every truncation. The signed
+  methods paid it twice, once per bound. This is the same fix 0.5.1 made to
+  `CastIt`; the two traits had duplicated the bound logic. `TrunIt` still calls
+  `trunc`, because there the truncated value is what gets range checked rather
+  than being a test for integrality.
+
 ## 0.5.1
 
 ### Changed
