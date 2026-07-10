@@ -79,7 +79,8 @@ macro_rules! impl_trunit {
         $(
         #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
         impl TrunIt for $f {
-            #[inline]
+            // Pure forwarding; see the note on `CastIt::u`.
+            #[inline(always)]
             fn tu(self) -> usize {
                 self.tusize()
             }

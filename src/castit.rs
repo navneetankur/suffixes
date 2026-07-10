@@ -29,11 +29,15 @@ macro_rules! cast_int_to_float {
             {
                 const LO: $t = $crate::bounds::lo!($s, $t);
                 const HI: $t = $crate::bounds::hi!($s, $t);
+                // No `is_finite` check: widening an integer never produces NaN, and
+                // the only overflow to `inf` is `u128`/`i128` into `f32`, where `hi`
+                // is `inf` too and `inf < inf` is false. The bound rejects it.
+                //
                 // `Range::contains` would be a generic call in an unoptimized build.
                 #[allow(clippy::manual_range_contains)]
                 {
                     assert!(
-                        after.is_finite() && after >= LO && after < HI && after as $s == self,
+                        after >= LO && after < HI && after as $s == self,
                         "can't cast {self} to {} without loss", stringify!($t),
                     );
                 }
@@ -73,7 +77,10 @@ macro_rules! cast_float_to_int {
             {
                 const LO: $f = $crate::bounds::lo!($t, $f);
                 const HI: $f = $crate::bounds::hi!($t, $f);
-                assert!(self.is_finite(), "can't cast {self} to {}", stringify!($t));
+                // No `is_finite` check: NaN fails every comparison and the
+                // infinities fail a bound, `inf < inf` included, so the range check
+                // already rejects them. They report as out of range.
+                //
                 // `Range::contains` would be a generic call in an unoptimized build.
                 #[allow(clippy::manual_range_contains)]
                 {
@@ -122,7 +129,11 @@ macro_rules! impl_castit {
     ($($t: ty),*) => {
         $(
         impl CastIt for $t {
-            #[inline]
+            // Pure forwarding, so `inline(always)` collapses the frame without
+            // duplicating a guard. The guarded methods stay `inline`: always
+            // inlining them would stamp their cold panic path into every call site
+            // of every downstream crate's unoptimized build.
+            #[inline(always)]
             fn u(self) -> usize {
                 self.usize()
             }
@@ -137,7 +148,11 @@ macro_rules! impl_castit_float {
     ($($t: ty),*) => {
         $(
         impl CastIt for $t {
-            #[inline]
+            // Pure forwarding, so `inline(always)` collapses the frame without
+            // duplicating a guard. The guarded methods stay `inline`: always
+            // inlining them would stamp their cold panic path into every call site
+            // of every downstream crate's unoptimized build.
+            #[inline(always)]
             fn u(self) -> usize {
                 self.usize()
             }

@@ -5,7 +5,10 @@ macro_rules! cast_from_these {
     ($t: ident <= $($f: ident),*) => {
         $(
         impl CastFrom<$f> for $t {
-            #[inline]
+            // Pure forwarding into `CastIt`, which carries the guard. Without
+            // `inline(always)` every `cast_from` burns a frame of its own before
+            // reaching it in an unoptimized build.
+            #[inline(always)]
             fn cast_from(v: $f) -> $t {
                 use crate::CastIt;
                 <$f as CastIt>::$t(v)

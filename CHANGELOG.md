@@ -14,6 +14,19 @@
   infinities fail a bound, so the range check already rejected them. They now
   panic with `is out of range for` rather than `can't truncate`.
 
+- `CastIt` drops its `is_finite` checks for the same reason, so every guard in
+  the crate is now free of calls on the path where it passes. Casting a NaN or an
+  infinity to an integer panics with `is out of range for` rather than
+  `can't cast`. Float to float casts still test for NaN, which is not redundant
+  there: NaN converts exactly but never compares equal to itself.
+
+- `CastIt::u`, `TrunIt::tu` and `CastFrom::cast_from` are `inline(always)`. They
+  only forward, so collapsing them costs no code and saves a stack frame per call
+  in an unoptimized build. The guarded methods stay `inline` on purpose: always
+  inlining those would stamp their cold panic path into every call site of a
+  dependent crate's debug build, which measures at roughly 190 bytes of `.text`
+  per cast.
+
 ## 0.5.2
 
 ### Changed
