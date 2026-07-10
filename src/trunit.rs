@@ -4,11 +4,13 @@ pub trait TrunIt: Sized {
     fn tu16(self) -> u16;
     fn tu32(self) -> u32;
     fn tu64(self) -> u64;
+    fn tu128(self) -> u128;
     fn tusize(self) -> usize;
     fn ti8(self) ->  i8;
     fn ti16(self) -> i16;
     fn ti32(self) -> i32;
     fn ti64(self) -> i64;
+    fn ti128(self) -> i128;
     fn tisize(self) -> isize;
 }
 
@@ -53,8 +55,10 @@ macro_rules! impl_trunit {
             fn tu(self) -> usize {
                 self.tusize()
             }
-            trun_to_int!(unsigned: tu8 -> u8, tu16 -> u16, tu32 -> u32, tu64 -> u64, tusize -> usize);
-            trun_to_int!(signed: ti8 -> i8, ti16 -> i16, ti32 -> i32, ti64 -> i64, tisize -> isize);
+            trun_to_int!(unsigned:
+                tu8 -> u8, tu16 -> u16, tu32 -> u32, tu64 -> u64, tu128 -> u128, tusize -> usize);
+            trun_to_int!(signed:
+                ti8 -> i8, ti16 -> i16, ti32 -> i32, ti64 -> i64, ti128 -> i128, tisize -> isize);
         }
         )*
     };

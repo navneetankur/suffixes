@@ -25,6 +25,11 @@ is a plain `as`, and always has been. Everything below describes debug builds.
   never compares equal to itself, so the round trip rejected it. `f32::NAN.f64()`
   panicked.
 
+### Added
+
+- `TrunIt::tu128` and `TrunIt::ti128`, matching the `u128`/`i128` methods
+  `CastIt` already had.
+
 ### Changed
 
 - `TrunIt` now range checks the truncated value rather than the input, so

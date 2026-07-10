@@ -382,12 +382,14 @@ fn test_trun_f32() {
     assert_eq!(three.tu16()   , three as u16);
     assert_eq!(three.tu32()   , three as u32);
     assert_eq!(three.tu64()   , three as u64);
+    assert_eq!(three.tu128()  , three as u128);
     assert_eq!(three.tusize() , three as usize);
     assert_eq!(three.tu()     , three as usize);
     assert_eq!(three.ti8()    , three as i8);
     assert_eq!(three.ti16()   , three as i16);
     assert_eq!(three.ti32()   , three as i32);
     assert_eq!(three.ti64()   , three as i64);
+    assert_eq!(three.ti128()  , three as i128);
     assert_eq!(three.tisize() , three as isize);
 }
 #[test]
@@ -398,12 +400,14 @@ fn test_trun_f64() {
     assert_eq!(three.tu16()   , three as u16);
     assert_eq!(three.tu32()   , three as u32);
     assert_eq!(three.tu64()   , three as u64);
+    assert_eq!(three.tu128()  , three as u128);
     assert_eq!(three.tusize() , three as usize);
     assert_eq!(three.tu()     , three as usize);
     assert_eq!(three.ti8()    , three as i8);
     assert_eq!(three.ti16()   , three as i16);
     assert_eq!(three.ti32()   , three as i32);
     assert_eq!(three.ti64()   , three as i64);
+    assert_eq!(three.ti128()  , three as i128);
     assert_eq!(three.tisize() , three as isize);
 }
 

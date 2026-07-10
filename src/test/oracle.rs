@@ -8,7 +8,7 @@
 //! guards it is checking. The boundary tests next door were derived from the
 //! same reasoning as the guards; these are not.
 #![cfg(debug_assertions)]
-use crate::CastIt;
+use crate::{CastIt, TrunIt};
 
 /// 2^127, the largest magnitude that survives `as i128` intact.
 const I128_LIMIT: f64 = 170_141_183_460_469_231_731_687_303_715_884_105_728.0;
@@ -141,6 +141,43 @@ macro_rules! i2f {
             }
         }
     }};
+}
+
+/// TrunIt rounds toward zero, so the oracle checks the *truncated* value.
+/// Targets are capped at 64 bits: `u128::MAX as i128` saturates, which would
+/// break the oracle's own range comparison.
+macro_rules! t2i {
+    ($f: ident, $name: ident -> $t: ident, $probe: expr) => {{
+        for v in $probe {
+            let v: $f = v;
+            let in_range = v.is_finite() && (v.trunc().abs() as f64) < I128_LIMIT && {
+                let b = v.trunc() as i128;
+                b >= <$t>::MIN as i128 && b <= <$t>::MAX as i128
+            };
+            if panics(move || { let _ = <$f as TrunIt>::$name(v); }) == in_range {
+                panic!(
+                    "{}::{}: v={:e} (bits {:#x}) in_range={in_range} but guard disagreed",
+                    stringify!($f), stringify!($name), v, v.to_bits(),
+                );
+            }
+        }
+    }};
+}
+
+#[test]
+fn truncation_matches_oracle() {
+    t2i!(f32, tu8 -> u8, probe_f32());
+    t2i!(f32, tu16 -> u16, probe_f32());
+    t2i!(f32, tu32 -> u32, probe_f32());
+    t2i!(f32, tu64 -> u64, probe_f32());
+    t2i!(f32, ti8 -> i8, probe_f32());
+    t2i!(f32, ti32 -> i32, probe_f32());
+    t2i!(f32, ti64 -> i64, probe_f32());
+    t2i!(f64, tu8 -> u8, probe_f64());
+    t2i!(f64, tu32 -> u32, probe_f64());
+    t2i!(f64, tu64 -> u64, probe_f64());
+    t2i!(f64, ti32 -> i32, probe_f64());
+    t2i!(f64, ti64 -> i64, probe_f64());
 }
 
 #[test]

@@ -32,8 +32,12 @@ must_panic! {
     trun_f32_pow2_31_to_i32: 2f32.powi(31).ti32();
     trun_f32_pow2_32_to_u32: 2f32.powi(32).tu32();
     trun_f32_pow2_64_to_u64: 2f32.powi(64).tu64();
+    trun_f32_pow2_127_to_i128: 2f32.powi(127).ti128();
     trun_f64_pow2_63_to_i64: 2f64.powi(63).ti64();
     trun_f64_pow2_64_to_u64: 2f64.powi(64).tu64();
+    trun_f64_pow2_127_to_i128: 2f64.powi(127).ti128();
+    trun_f64_pow2_128_to_u128: 2f64.powi(128).tu128();
+    trun_f32_negative_to_u128: (-1f32).tu128();
 
     // Int to float. `after as Self` saturates, and at Self::MAX that cancels
     // out the rounding, so these lossy conversions used to pass silently.
