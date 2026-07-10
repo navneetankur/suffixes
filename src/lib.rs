@@ -16,6 +16,7 @@ mod test {
     mod boundary;
     mod f32panic;
     mod f64panic;
+    mod oracle;
     mod simpletests;
 
     #[test]
