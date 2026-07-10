@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.3
+
+### Changed
+
+- `TrunIt` no longer calls `trunc` in its guards, which was the last libcall
+  left in them. The guard never needed the truncated value, only the question of
+  whether it lands in range, and that is answerable from the input: `trunc(x)`
+  is in `[lo, hi)` exactly when `x` is in `(lo - 1, hi)`. A truncating guard now
+  makes no call at all on the path where it passes.
+
+- The `is_finite` check went with it. NaN fails every comparison and the
+  infinities fail a bound, so the range check already rejected them. They now
+  panic with `is out of range for` rather than `can't truncate`.
+
 ## 0.5.2
 
 ### Changed

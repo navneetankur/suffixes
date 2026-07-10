@@ -14,6 +14,7 @@ mod test {
     use crate::{WrappedOption, WrappedResult};
 
     mod boundary;
+    mod exhaustive;
     mod f32panic;
     mod f64panic;
     mod oracle;
