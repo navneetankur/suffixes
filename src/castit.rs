@@ -27,16 +27,8 @@ macro_rules! cast_int_to_float {
             let after = self as $t;
             #[cfg(debug_assertions)]
             {
-                // Shifting into an integer and widening keeps this const-evaluable,
-                // where `exp2` would be a libm call in the debug builds this block
-                // is compiled into. `2f32.powi(128)` overflows to `inf`, which the
-                // `is_finite` check rejects, same as the exclusive bound would.
-                const HI: $t = if <$s>::MIN == 0 {
-                    (1u128 << (<$s>::BITS - 1)) as $t * 2.0
-                } else {
-                    (1u128 << (<$s>::BITS - 1)) as $t
-                };
-                const LO: $t = if <$s>::MIN == 0 { 0.0 } else { -HI };
+                const LO: $t = $crate::bounds::lo!($s, $t);
+                const HI: $t = $crate::bounds::hi!($s, $t);
                 // `Range::contains` would be a generic call in an unoptimized build.
                 #[allow(clippy::manual_range_contains)]
                 {
@@ -73,13 +65,14 @@ macro_rules! cast_float_to_float {
 // checked against the exclusive power-of-two bound, which is always exact,
 // rather than against `MAX as Self`.
 macro_rules! cast_float_to_int {
-    (@one $f: ty, $t: ident, $lo: expr, $hi: expr) => {
+    ($f: ty; $($t: ident),*) => {
+        $(
         #[inline]
         fn $t(self) -> $t {
             #[cfg(debug_assertions)]
             {
-                const LO: $f = $lo;
-                const HI: $f = $hi;
+                const LO: $f = $crate::bounds::lo!($t, $f);
+                const HI: $f = $crate::bounds::hi!($t, $f);
                 assert!(self.is_finite(), "can't cast {self} to {}", stringify!($t));
                 // `Range::contains` would be a generic call in an unoptimized build.
                 #[allow(clippy::manual_range_contains)]
@@ -103,16 +96,7 @@ macro_rules! cast_float_to_int {
             }
             return self as $t;
         }
-    };
-    ($f: ty; unsigned: $($t: ident),*) => {
-        $( cast_float_to_int!(@one $f, $t, 0.0, (1u128 << (<$t>::BITS - 1)) as $f * 2.0); )*
-    };
-    ($f: ty; signed: $($t: ident),*) => {
-        $( cast_float_to_int!(
-            @one $f, $t,
-            -((1u128 << (<$t>::BITS - 1)) as $f),
-            (1u128 << (<$t>::BITS - 1)) as $f
-        ); )*
+        )*
     };
 }
 macro_rules! cast_these {
@@ -157,8 +141,8 @@ macro_rules! impl_castit_float {
             fn u(self) -> usize {
                 self.usize()
             }
-            cast_float_to_int!($t; unsigned: u8, u16, u32, u64, u128, usize);
-            cast_float_to_int!($t; signed: i8, i16, i32, i64, i128, isize);
+            cast_float_to_int!($t; u8, u16, u32, u64, u128, usize);
+            cast_float_to_int!($t; i8, i16, i32, i64, i128, isize);
             cast_float_to_float!(f32, f64);
         }
         )*

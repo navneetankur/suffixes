@@ -1,5 +1,6 @@
 #![allow(clippy::needless_return)]
 #![doc = include_str!("../README.md")]
+mod bounds;
 pub mod wrap;
 pub mod castit;
 pub mod castfrom;
