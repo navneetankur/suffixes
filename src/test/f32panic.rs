@@ -1,3 +1,5 @@
+// The cast guards are compiled out in release builds.
+#![cfg(debug_assertions)]
 use crate::{TrunIt, CastIt};
 macro_rules! f32panic {
     ($($t: ident),*) => {

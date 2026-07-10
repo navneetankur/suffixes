@@ -1,6 +1,6 @@
 [package]
 name = "suffixes"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 readme = "README.md"
 homepage = "https://github.com/navneetankur/suffixes"
@@ -12,5 +12,4 @@ description = "Cast primitive type and wrap Option/Result using suffix. Like 2.s
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-more-asserts = "0.3"
 
